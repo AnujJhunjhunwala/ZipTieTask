@@ -1,6 +1,6 @@
-## ZipTieTask
+# ZipTieTask
 
-# Python Developer Recruitment Task
+## Python Developer Recruitment Task
 
 The goal of this task is to create a fully working API solution based on Python FastAPI and a MySQL database.
 
