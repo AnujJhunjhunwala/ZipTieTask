@@ -4,7 +4,7 @@ from sqlalchemy import Column, ForeignKey, Integer, String, Boolean
 class Author(Base):
     __tablename__ = "authors"
 
-    author_id = Column(Integer, primary_key=True, index=True)
+    author_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     first_name = Column(String(50), index=True)
     last_name = Column(String(50), index=True)
     country = Column(String(50))
@@ -12,7 +12,7 @@ class Author(Base):
 class Book(Base):
     __tablename__ = "books"
 
-    book_id = Column(Integer, primary_key=True, index=True)
+    book_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     title = Column(String(100), index=True)
     genre = Column(String(50), index=True)
     year_published = Column(Integer)
