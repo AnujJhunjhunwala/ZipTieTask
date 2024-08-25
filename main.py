@@ -1,11 +1,7 @@
-from fastapi import APIRouter, Depends, FastAPI, HTTPException, Path
+from fastapi import APIRouter, FastAPI
 import models
-from database import SessionLocal, engine
-from typing import Annotated
-from sqlalchemy.orm import Session
+from database import engine
 import models
-from pydantic import BaseModel, Field
-from starlette import status
 
 from routers import authors, books
 
