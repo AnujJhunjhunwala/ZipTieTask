@@ -7,7 +7,7 @@ class Author(Base):
     author_id = Column(Integer, primary_key=True, index=True)
     first_name = Column(String(50), index=True)
     last_name = Column(String(50), index=True)
-    country = Column(String)
+    country = Column(String(50))
 
 class Book(Base):
     __tablename__ = "books"
