@@ -6,6 +6,7 @@ from database import SessionLocal
 from sqlalchemy.orm import Session
 from starlette import status
 import models
+from sqlalchemy import func
 
 router = APIRouter(tags=["books"])
 
@@ -78,7 +79,7 @@ async def delete_book(db: db_dependency, book_id: int = Path(gt=0)):
 @router.get("/books/year/{year_published}", status_code=status.HTTP_200_OK)
 async def search_books_by_year(db: db_dependency, year_published: int = Path(gt=1000)):
     books_search = db.query(models.Book).filter(models.Book.year_published == year_published).all()
-    if books_search is not None:
+    if len(books_search) != 0:
         return books_search
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No books in stock for year "+str(year_published))
 
@@ -93,7 +94,7 @@ async def check_book_availability(db: db_dependency, book_id: int = Path(gt=0)):
 # Get books by country of author
 @router.get("/books/author_country/{country}", status_code=status.HTTP_200_OK)
 async def get_books_by_author_country(db: db_dependency, country: str):
-    books_search = db.query(models.Book).join(models.Author).filter(models.Author.country == country).all()
-    if books_search is not None:
+    books_search = db.query(models.Book).join(models.Author).filter(func.lower(models.Author.country) == country.lower()).all()
+    if len(books_search) != 0:
         return books_search
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No books found for authors from "+country)

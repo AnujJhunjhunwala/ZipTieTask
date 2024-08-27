@@ -5,6 +5,7 @@ from database import SessionLocal
 from sqlalchemy.orm import Session
 from starlette import status
 import models
+from sqlalchemy import func
 
 router = APIRouter(tags=["authors"])
 
@@ -72,9 +73,15 @@ async def delete_author(db: db_dependency, author_id: int = Path(gt=0)):
 # Search authors by first name or last name
 @router.get("/authors/search", status_code=status.HTTP_200_OK)
 async def search_authors(db: db_dependency, first_name: str = None, last_name: str = None):
+    if first_name is None and last_name is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Either first_name or last_name must be provided")
     query = db.query(models.Author)
-    if first_name is not None:
+    if first_name is not None and last_name is not None:
+        query = query.filter(func.lower(models.Author.first_name) == first_name.lower(), func.lower(models.Author.last_name) == last_name.lower())
+    elif first_name is not None:
         query = query.filter(models.Author.first_name == first_name)
-    if last_name is not None:
+    else:
         query = query.filter(models.Author.last_name == last_name)
-    return query.all()
+    if len(query.all()) != 0:
+        return query.all()
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No authors found with given search criteria")
