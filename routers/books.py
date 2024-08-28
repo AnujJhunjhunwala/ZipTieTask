@@ -1,5 +1,5 @@
 from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException, Path
+from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from pydantic import BaseModel, Field
 import sqlalchemy
 from database import SessionLocal
@@ -39,8 +39,9 @@ async def create_book(db: db_dependency, book_request: BookRequest):
 
 # Fetch all books
 @router.get("/books", status_code=status.HTTP_200_OK)
-async def read_all_books(db: db_dependency):
-    return db.query(models.Book).all()
+async def read_all_books(db: db_dependency, limit: int = Query(default=2, gt=0), offset: int = Query(default=0, ge=0)):
+    books = db.query(models.Book).offset(offset).limit(limit).all()
+    return books
 
 # Fetch book by ID
 @router.get("/book/{book_id}", status_code=status.HTTP_200_OK)
@@ -77,8 +78,8 @@ async def delete_book(db: db_dependency, book_id: int = Path(gt=0)):
 
 # Search books by published year
 @router.get("/books/year/{year_published}", status_code=status.HTTP_200_OK)
-async def search_books_by_year(db: db_dependency, year_published: int = Path(gt=1000)):
-    books_search = db.query(models.Book).filter(models.Book.year_published == year_published).all()
+async def search_books_by_year(db: db_dependency, year_published: int = Path(gt=1000), limit: int = Query(default=2, gt=0), offset: int = Query(default=0, ge=0)):
+    books_search = db.query(models.Book).filter(models.Book.year_published == year_published).offset(offset).limit(limit).all()
     if len(books_search) != 0:
         return books_search
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No books in stock for year "+str(year_published))
@@ -93,8 +94,8 @@ async def check_book_availability(db: db_dependency, book_id: int = Path(gt=0)):
 
 # Get books by country of author
 @router.get("/books/author_country/{country}", status_code=status.HTTP_200_OK)
-async def get_books_by_author_country(db: db_dependency, country: str):
-    books_search = db.query(models.Book).join(models.Author).filter(func.lower(models.Author.country) == country.lower()).all()
+async def get_books_by_author_country(db: db_dependency, country: str, limit: int = Query(default=2, gt=0), offset: int = Query(default=0, ge=0)):
+    books_search = db.query(models.Book).join(models.Author).filter(func.lower(models.Author.country) == country.lower()).offset(offset).limit(limit).all()
     if len(books_search) != 0:
         return books_search
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No books found for authors from "+country)
