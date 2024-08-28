@@ -1,11 +1,11 @@
 from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException, Path
+from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from pydantic import BaseModel, Field
 from database import SessionLocal
 from sqlalchemy.orm import Session
 from starlette import status
 import models
-from sqlalchemy import func
+from sqlalchemy import func, or_
 
 router = APIRouter(tags=["authors"])
 
@@ -36,8 +36,9 @@ async def create_author(db: db_dependency, author_request: AuthorRequest):
 
 # Fetch all authors
 @router.get("/authors", status_code=status.HTTP_200_OK)
-async def read_all_authors(db: db_dependency):
-    return db.query(models.Author).all()
+async def read_all_authors(db: db_dependency, limit: int = Query(default=2, gt=0), offset: int = Query(default=0, ge=0)):
+    authors = db.query(models.Author).offset(offset).limit(limit).all()
+    return authors
 
 # Fetch author by ID
 @router.get("/author/{author_id}", status_code=status.HTTP_200_OK)
@@ -72,16 +73,17 @@ async def delete_author(db: db_dependency, author_id: int = Path(gt=0)):
 
 # Search authors by first name or last name
 @router.get("/authors/search", status_code=status.HTTP_200_OK)
-async def search_authors(db: db_dependency, first_name: str = None, last_name: str = None):
-    if first_name is None and last_name is None:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Either first_name or last_name must be provided")
-    query = db.query(models.Author)
-    if first_name is not None and last_name is not None:
-        query = query.filter(func.lower(models.Author.first_name) == first_name.lower(), func.lower(models.Author.last_name) == last_name.lower())
-    elif first_name is not None:
-        query = query.filter(models.Author.first_name == first_name)
-    else:
-        query = query.filter(models.Author.last_name == last_name)
-    if len(query.all()) != 0:
-        return query.all()
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No authors found with given search criteria")
+async def search_authors(db: db_dependency, name: str = None, limit: int = Query(default=2, gt=0), offset: int = Query(default=0, ge=0)):
+    if name is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Please enter a name to search")
+    query = db.query(models.Author).filter(
+        or_(
+            func.lower(models.Author.first_name).like(f"%{name.lower()}%"),
+            func.lower(models.Author.last_name).like(f"%{name.lower()}%"),
+            func.lower(func.concat(models.Author.first_name, ' ', models.Author.last_name)).like(f"%{name.lower()}%")
+        )
+    ).offset(offset).limit(limit).all()
+    if len(query) == 0:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No authors found with given search criteria")
+    return query
+    
