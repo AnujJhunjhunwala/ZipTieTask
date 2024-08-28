@@ -91,7 +91,6 @@ async def delete_author(db: db_dependency, author_id: int = Path(gt=0)):
     db.query(models.Author).filter(models.Author.author_id == author_id).delete()
     db.commit()
 
-# Search authors by name
 @router.get("/authors/search", status_code=status.HTTP_200_OK)
 async def search_authors(db: db_dependency, name: str = None, limit: int = Query(default=2, gt=0), offset: int = Query(default=0, ge=0)):
     """
