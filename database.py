@@ -18,8 +18,6 @@ db_name = os.getenv('DB_NAME')
 # Construct the connection URL
 DATABASE_URL = f"mysql+pymysql://{db_username}:{db_password}@{db_host}:{db_port}/{db_name}"
 
-print(DATABASE_URL)
-
 engine = create_engine(DATABASE_URL)
 
 if not database_exists(engine.url):
