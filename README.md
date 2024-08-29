@@ -18,3 +18,31 @@ Your project needs to meet the following requirements:
 - The endpoint responsible for reading the data should support pagination.
 - requirements.txt should be generated.
 - Docstrings are optional, but welcomed.
+
+## Prerequisites
+### Tools and software required
+
+- Python 3.8+
+- MySQL 8.0+
+- Git
+
+### Install dependencies
+- To install dependencies, run the following command:
+  ```sh
+  pip install -r requirements.txt
+
+### Environment Variables
+
+- Modify variables in .env file according to your MySQL configuration.
+
+### Running the Application
+
+- To start FastAPI server, run the following command:
+  ```sh
+  uvicorn app.main:app --reload
+- Swagger UI: http://localhost:8000/docs
+
+## Contact Information
+
+- Developed by Anuj Jhunjhunwala.
+- For any questions or inquiries, please contact me at anujjhunjhunwala98@gmail.com
